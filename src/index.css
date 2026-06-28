@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+
+  --color-primary: #9f402d;
+  --color-primary-container: #e2725b;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #5a0d02;
+  
+  --color-background: #faf9f6;
+  --color-on-background: #1a1c1a;
+  
+  --color-surface: #faf9f6;
+  --color-on-surface: #1a1c1a;
+  --color-surface-container: #efeeeb;
+  --color-surface-container-low: #f4f3f1;
+  --color-surface-container-high: #e9e8e5;
+  --color-surface-container-highest: #e3e2e0;
+  --color-surface-container-lowest: #ffffff;
+  
+  --color-on-surface-variant: #56423e;
+  --color-outline: #89726d;
+  --color-outline-variant: #ddc0ba;
+
+  --color-on-tertiary-container: #432501;
+  --color-inverse-on-surface: #f2f1ee;
+  --color-error: #ba1a1a;
+  --color-secondary-container: #e1e1c9;
+  --color-inverse-primary: #ffb4a5;
+  --color-tertiary-fixed: #ffdcbd;
+  --color-secondary-fixed: #e4e4cc;
+  --color-on-tertiary-fixed-variant: #623f18;
+  --color-on-primary-fixed: #3e0500;
+  --color-on-tertiary: #ffffff;
+  --color-on-secondary-fixed: #1b1d0e;
+  --color-on-secondary-fixed-variant: #474836;
+  --color-tertiary: #7d562d;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-tertiary-fixed: #2c1600;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #636451;
+  --color-on-error-container: #93000a;
+  --color-tertiary-container: #b88a5c;
+  --color-secondary-fixed-dim: #c8c8b0;
+  --color-secondary: #5e604d;
+  --color-surface-variant: #e3e2e0;
+  --color-inverse-surface: #2f312f;
+  --color-on-primary-fixed-variant: #802918;
+  --color-surface-bright: #faf9f6;
+  --color-primary-fixed-dim: #ffb4a5;
+  --color-surface-dim: #dbdad7;
+  --color-tertiary-fixed-dim: #f0bd8b;
+  --color-surface-tint: #9f402d;
+  --color-primary-fixed: #ffdad3;
+
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+
+  --spacing-stack-lg: 48px;
+  --spacing-margin-mobile: 20px;
+  --spacing-margin-desktop: 64px;
+  --spacing-gutter: 24px;
+  --spacing-container-max: 1280px;
+  --spacing-stack-md: 24px;
+  --spacing-stack-sm: 12px;
+  --spacing-base: 8px;
+
+  --font-label-sm: "Inter";
+  --font-body-md: "Inter";
+  --font-body-lg: "Inter";
+  --font-headline-xl: "Playfair Display";
+  --font-display-lg-mobile: "Playfair Display";
+  --font-label-md: "Inter";
+  --font-headline-md: "Playfair Display";
+  --font-display-lg: "Playfair Display";
+  --font-headline-xl-mobile: "Playfair Display";
+
+  --text-label-sm: 12px;
+  --text-label-sm--line-height: 1.0;
+  --text-label-sm--font-weight: 500;
+
+  --text-body-md: 16px;
+  --text-body-md--line-height: 1.6;
+  --text-body-md--font-weight: 400;
+
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 1.6;
+  --text-body-lg--font-weight: 400;
+
+  --text-headline-xl: 40px;
+  --text-headline-xl--line-height: 1.2;
+  --text-headline-xl--font-weight: 600;
+
+  --text-display-lg-mobile: 40px;
+  --text-display-lg-mobile--line-height: 1.2;
+  --text-display-lg-mobile--font-weight: 700;
+
+  --text-label-md: 14px;
+  --text-label-md--line-height: 1.0;
+  --text-label-md--letter-spacing: 0.05em;
+  --text-label-md--font-weight: 600;
+
+  --text-headline-md: 28px;
+  --text-headline-md--line-height: 1.3;
+  --text-headline-md--font-weight: 500;
+
+  --text-display-lg: 56px;
+  --text-display-lg--line-height: 1.1;
+  --text-display-lg--letter-spacing: -0.02em;
+  --text-display-lg--font-weight: 700;
+
+  --text-headline-xl-mobile: 32px;
+  --text-headline-xl-mobile--line-height: 1.2;
+  --text-headline-xl-mobile--font-weight: 600;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-on-surface font-sans antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+.ambient-shadow {
+  box-shadow: 0 20px 40px rgba(159, 64, 45, 0.08);
+}
+
+.glass-nav {
+  @apply backdrop-blur-md bg-background/80;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+.custom-shadow {
+  box-shadow: 0 10px 30px -10px rgba(226, 114, 91, 0.08);
+}
+.product-row-hover:hover {
+  box-shadow: 0 20px 40px -15px rgba(159, 64, 45, 0.12);
+  transform: translateY(-4px);
+}
