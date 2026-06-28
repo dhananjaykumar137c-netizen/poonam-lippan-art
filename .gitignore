@@ -6,4 +6,4 @@ coverage/
 *.log
 .env*
 !.env.example
-supabase database password.txt
+database_password.txt
