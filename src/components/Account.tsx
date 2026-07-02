@@ -1,6 +1,8 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { User, ShoppingCart, CreditCard, Heart, LogOut, Package, PlusCircle, Edit, Globe, Share2 } from 'lucide-react';
 import type { Order, PaymentMethod } from '../types';
+import { supabase } from '../supabaseClient';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface AccountProps {
   onLogout: () => void;
@@ -33,6 +35,18 @@ const PAYMENT_METHODS: PaymentMethod[] = [
 ];
 
 export default function Account({ onLogout }: AccountProps) {
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+  }, []);
+
+  const fullName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Artisan';
+  const role = user?.user_metadata?.role || 'Collector';
+  const avatarUrl = user?.user_metadata?.avatar_url || 'https://lh3.googleusercontent.com/aida-public/AB6AXuBVDHB71uFOy9RRaQGiUMWbKtRWRO-WOdmou6CJ5ID1D-4n0zXbs7p3EJgisw4PlwkhnNn21Dl7cKtKuSWoLC2BFp8sewjg1c4fU3dEVWDu2BK7r9WOj50ESTt3WwBhvvpSdjgKW0kQsJMBFa7JZQ8JRqjRq5SYvlmGNc9b1tDUMnqzVEjuzOg6nJXvma-AVa9aX8aUaG7hS9aIKMAhzN1EuifOPXltL6w4COU4icE7BipO8IMrR208ECKpj2cTJ0IKPuKknwdtQWat';
+
   return (
     <main className="min-h-screen py-32 px-6 md:px-16 max-w-7xl mx-auto w-full">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
@@ -43,14 +57,16 @@ export default function Account({ onLogout }: AccountProps) {
               <div className="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden">
                 <img 
                   className="w-full h-full object-cover" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVDHB71uFOy9RRaQGiUMWbKtRWRO-WOdmou6CJ5ID1D-4n0zXbs7p3EJgisw4PlwkhnNn21Dl7cKtKuSWoLC2BFp8sewjg1c4fU3dEVWDu2BK7r9WOj50ESTt3WwBhvvpSdjgKW0kQsJMBFa7JZQ8JRqjRq5SYvlmGNc9b1tDUMnqzVEjuzOg6nJXvma-AVa9aX8aUaG7hS9aIKMAhzN1EuifOPXltL6w4COU4icE7BipO8IMrR208ECKpj2cTJ0IKPuKknwdtQWat" 
+                  src={avatarUrl} 
+                  alt={fullName}
                 />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-on-surface">Poonam</h2>
-                <p className="text-xs text-on-surface-variant">Lippan Artist</p>
+                <h2 className="text-lg font-bold text-on-surface">{fullName}</h2>
+                <p className="text-xs text-on-surface-variant">{role}</p>
               </div>
             </div>
+
 
             <nav className="flex flex-col gap-1">
               <SidebarLink icon={<User className="w-5 h-5"/>} label="Profile" />

@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { Page } from '../types';
+import { supabase } from '../supabaseClient';
 
 interface AuthProps {
   onLogin: () => void;
@@ -12,6 +13,63 @@ interface AuthProps {
 export default function Auth({ onLogin, onExplore, setCurrentPage }: AuthProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (isLogin) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (signInError) throw signInError;
+        onLogin();
+      } else {
+        const { error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: fullName,
+              role: 'Collector',
+            },
+          },
+        });
+        if (signUpError) throw signUpError;
+        alert('Registration successful! Please check your email for confirmation (if enabled in Supabase) or try logging in.');
+        setIsLogin(true);
+      }
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during authentication.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
+      if (oauthError) throw oauthError;
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during Google sign-in.');
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="min-h-screen flex items-center justify-center px-6 md:px-16 py-24 relative overflow-hidden bg-background">
@@ -37,22 +95,52 @@ export default function Auth({ onLogin, onExplore, setCurrentPage }: AuthProps) 
           {/* Form Toggle */}
           <div className="flex p-1 bg-surface-container rounded-xl">
             <button 
-              onClick={() => setIsLogin(true)}
-              className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${isLogin ? 'bg-white text-primary shadow-sm' : 'text-on-surface-variant'}`}
+              type="button"
+              disabled={loading}
+              onClick={() => { setIsLogin(true); setError(null); }}
+              className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${isLogin ? 'bg-white text-primary shadow-sm' : 'text-on-surface-variant'} disabled:opacity-50`}
             >
               Login
             </button>
             <button 
-              onClick={() => setIsLogin(false)}
-              className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${!isLogin ? 'bg-white text-primary shadow-sm' : 'text-on-surface-variant'}`}
+              type="button"
+              disabled={loading}
+              onClick={() => { setIsLogin(false); setError(null); }}
+              className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${!isLogin ? 'bg-white text-primary shadow-sm' : 'text-on-surface-variant'} disabled:opacity-50`}
             >
               Register
             </button>
           </div>
 
+          {/* Error Alert Box */}
+          {error && (
+            <div className="bg-red-50 text-red-700 text-sm p-4 rounded-xl border border-red-200 animate-pulse">
+              {error}
+            </div>
+          )}
+
           {/* Auth Form */}
-          <form className="flex flex-col gap-8" onSubmit={(e) => { e.preventDefault(); onLogin(); }}>
+          <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
             <div className="space-y-6">
+              {!isLogin && (
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-bold text-on-surface-variant px-1" htmlFor="fullName">Full Name</label>
+                  <div className="relative group">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors w-5 h-5" />
+                    <input 
+                      className="w-full pl-11 pr-4 py-4 bg-surface-container-low border-none rounded-xl focus:ring-1 focus:ring-primary-container text-base placeholder:text-on-surface-variant/40 transition-all shadow-inner" 
+                      id="fullName" 
+                      placeholder="Poonam Devi" 
+                      type="text" 
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+                </div>
+              )}
+
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-bold text-on-surface-variant px-1" htmlFor="email">Email Address</label>
                 <div className="relative group">
@@ -62,37 +150,50 @@ export default function Auth({ onLogin, onExplore, setCurrentPage }: AuthProps) 
                     id="email" 
                     placeholder="artisan@heritage.com" 
                     type="email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={loading}
                   />
                 </div>
               </div>
+
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-bold text-on-surface-variant px-1" htmlFor="password">Password</label>
                 <div className="relative group">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors w-5 h-5" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors w-5 h-5" />
                   <input 
                     className="w-full pl-11 pr-12 py-4 bg-surface-container-low border-none rounded-xl focus:ring-1 focus:ring-primary-container text-base placeholder:text-on-surface-variant/40 transition-all shadow-inner" 
                     id="password" 
                     placeholder="••••••••" 
                     type={showPassword ? 'text' : 'password'} 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={loading}
                   />
                   <button 
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant cursor-pointer hover:text-primary transition-colors focus:outline-none"
+                    disabled={loading}
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
             </div>
+
             <div className="flex justify-end -mt-4">
               <a className="text-xs text-on-surface-variant hover:text-primary transition-colors" href="#">Forgot password?</a>
             </div>
+
             <button 
-              className="w-full py-5 bg-primary-container text-on-primary rounded-xl font-bold shadow-lg hover:shadow-primary-container/20 hover:scale-[1.02] active:scale-95 transition-all" 
+              className="w-full py-5 bg-primary-container text-on-primary rounded-xl font-bold shadow-lg hover:shadow-primary-container/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none" 
               type="submit"
+              disabled={loading}
             >
-              Continue
+              {loading ? 'Processing...' : 'Continue'}
             </button>
           </form>
 
@@ -105,8 +206,10 @@ export default function Auth({ onLogin, onExplore, setCurrentPage }: AuthProps) 
 
           {/* Social Auth */}
           <button 
-            onClick={onLogin}
-            className="w-full py-4 px-4 bg-white border border-outline-variant/40 rounded-xl flex items-center justify-center gap-3 text-sm font-medium text-on-surface hover:bg-surface-container transition-all"
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            className="w-full py-4 px-4 bg-white border border-outline-variant/40 rounded-xl flex items-center justify-center gap-3 text-sm font-medium text-on-surface hover:bg-surface-container transition-all disabled:opacity-50"
           >
             <img 
               alt="Google" 
@@ -118,7 +221,7 @@ export default function Auth({ onLogin, onExplore, setCurrentPage }: AuthProps) 
 
           <div className="mt-4 text-center">
             <p className="text-sm text-on-surface-variant">
-              New to the craft? <button onClick={() => setCurrentPage('shop')} className="text-primary font-bold hover:underline">Explore Collections</button>
+              New to the craft? <button type="button" onClick={() => setCurrentPage('shop')} className="text-primary font-bold hover:underline">Explore Collections</button>
             </p>
           </div>
         </div>
@@ -139,3 +242,4 @@ export default function Auth({ onLogin, onExplore, setCurrentPage }: AuthProps) 
     </main>
   );
 }
+

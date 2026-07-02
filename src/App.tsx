@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './components/Home';
@@ -6,19 +6,45 @@ import Auth from './components/Auth';
 import Account from './components/Account';
 import Shop from './components/Shop';
 import type { Page } from './types';
+import { supabase } from './supabaseClient';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  useEffect(() => {
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+      if (session && currentPage === 'auth') {
+        setCurrentPage('account');
+      }
+    });
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const loggedIn = !!session;
+      setIsLoggedIn(loggedIn);
+      if (loggedIn) {
+        // Redirect to account if user is on the login page
+        setCurrentPage((prev) => (prev === 'auth' ? 'account' : prev));
+      } else {
+        // Redirect to home if user was on the account page and logged out
+        setCurrentPage((prev) => (prev === 'account' ? 'home' : prev));
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   const handleLogin = () => {
-    setIsLoggedIn(true);
-    setCurrentPage('home');
+    setCurrentPage('account');
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setCurrentPage('home');
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
   };
 
   return (
